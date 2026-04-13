@@ -21,9 +21,14 @@ runs:
     - name: Install Stacklit
       shell: bash
       run: |
+        set -euo pipefail
         VERSION="${{ inputs.version }}"
         if [ "$VERSION" = "latest" ]; then
           VERSION=$(curl -fsSL https://api.github.com/repos/glincker/stacklit/releases/latest | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+        fi
+        if [ -z "$VERSION" ]; then
+          echo "::error::Failed to resolve Stacklit version"
+          exit 1
         fi
         echo "Installing stacklit $VERSION"
         curl -fsSL "https://github.com/glincker/stacklit/releases/download/${VERSION}/stacklit-linux-amd64" -o /usr/local/bin/stacklit
@@ -32,12 +37,15 @@ runs:
 
     - name: Run stacklit generate
       shell: bash
-      run: stacklit generate --quiet ${{ inputs.args }}
+      run: |
+        set -euo pipefail
+        stacklit generate --quiet "${{ inputs.args }}"
 
     - name: Check for index changes (check mode)
       if: inputs.mode == 'check'
       shell: bash
       run: |
+        set -euo pipefail
         if ! git diff --quiet -- stacklit.json DEPENDENCIES.md; then
           echo "::error::stacklit index is stale. Run 'stacklit generate' and commit the changes."
           git diff -- stacklit.json DEPENDENCIES.md
@@ -49,6 +57,7 @@ runs:
       if: inputs.mode == 'auto-commit'
       shell: bash
       run: |
+        set -euo pipefail
         if git diff --quiet -- stacklit.json DEPENDENCIES.md; then
           echo "No changes to stacklit index."
           exit 0
@@ -57,4 +66,4 @@ runs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add stacklit.json DEPENDENCIES.md
         git commit -m "chore: update stacklit index"
-        git push
+        git push || { echo "::error::Failed to push stacklit index updates"; exit 1; }
