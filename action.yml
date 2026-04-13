@@ -31,7 +31,9 @@ runs:
           exit 1
         fi
         echo "Installing stacklit $VERSION"
-        curl -fsSL "https://github.com/glincker/stacklit/releases/download/${VERSION}/stacklit-linux-amd64" -o /usr/local/bin/stacklit
+        VNUM="${VERSION#v}"
+        curl -fsSL "https://github.com/glincker/stacklit/releases/download/${VERSION}/stacklit_${VNUM}_linux_amd64.tar.gz" -o /tmp/stacklit.tar.gz
+        tar -xzf /tmp/stacklit.tar.gz -C /usr/local/bin stacklit
         chmod +x /usr/local/bin/stacklit
         stacklit --version
 
