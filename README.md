@@ -7,7 +7,7 @@ Keep your [Stacklit](https://github.com/glincker/stacklit) codebase index (`stac
 | Mode | Behavior |
 |------|----------|
 | `auto-commit` (default) | Regenerates the index and commits any changes back to the branch |
-| `check` | Fails the workflow if the index is stale — useful for PRs |
+| `check` | Fails the workflow if the index is stale  - useful for PRs |
 
 ## Usage
 
